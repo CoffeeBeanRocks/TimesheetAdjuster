@@ -28,5 +28,6 @@ if __name__ == '__main__':
     print("Enter the absolute file path of the excel file: ")
     path = input()
     deleteRows(path)
+    print("Finished!")
 
 
