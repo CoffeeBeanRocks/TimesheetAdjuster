@@ -1,5 +1,9 @@
 import pandas as pd
+import xlsxwriter
 from openpyxl import load_workbook
+import openpyxl
+from openpyxl.styles import numbers
+
 
 def deleteRows(FilePath):
     df = pd.read_excel(FilePath, sheet_name='Import', header=1)
@@ -14,20 +18,32 @@ def deleteRows(FilePath):
     writer.save()
     writer.close()
 
-# def formatCols():
-#     df = pd.read_excel(r'C:\Users\emeyers\Desktop\Excel File.xlsx', sheet_name='Data', header=0)
-#     workbook = xlsxwriter.Workbook(r'C:\Users\emeyers\Desktop\Excel File.xlsx')
-#     worksheet = workbook.add_worksheet(name='Data')
-#
-#     format3 = workbook.add_format({'num_format': 'mm/dd/yy'})
-#     worksheet.set_column(4, 4, 20, format3)
-#
+def formatCols(FilePath):
+    # df = pd.read_excel(r'C:\Users\emeyers\Desktop\Excel File.xlsx', sheet_name='Data', header=0)
+    workbook = openpyxl.load_workbook(FilePath)
+    worksheet = workbook['Data']
+
+    # worksheet.column_dimensions['E'].number_format = numbers.FORMAT_DATE_XLSX14
+    # worksheet.column_dimensions['H'].number_format = numbers.FORMAT_DATE_XLSX14
+
+    worksheet.column_dimensions['C'].width = 20
+    worksheet.column_dimensions['D'].width = 20
+    worksheet.column_dimensions['E'].width = 20
+    worksheet.column_dimensions['F'].width = 20
+    worksheet.column_dimensions['G'].width = 20
+    worksheet.column_dimensions['H'].width = 20
+    worksheet.column_dimensions['I'].width = 20
+
+    workbook.save(r'C:\Users\emeyers\Desktop\Excel File.xlsx')
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print("Enter the absolute file path of the excel file: ")
     path = input()
+    if '"' in path:
+        path = path.replace('"', '')
     deleteRows(path)
+    formatCols(path)
     print("Finished!")
 
 
