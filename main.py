@@ -1,3 +1,12 @@
+# @Author: Ethan Meyers
+# Email: ewm1230@gmail.com
+# Phone#: 847-212-2264
+# @Date: 06/13/2022
+
+# This script takes a path to an excel file
+# and outputs an excel sheet that filters all names
+# that are not on the acceptable 1099 driver list
+
 import pandas as pd
 import xlsxwriter
 from openpyxl import load_workbook
