@@ -15,22 +15,22 @@ from openpyxl.styles import numbers, PatternFill
 
 def deleteRows(FilePath):
     # Gets data from Excel sheet and removes elements that are in the 1099 drivers list
-    df = pd.read_excel(FilePath, sheet_name='Import', header=1)
-    df2 = pd.read_excel(FilePath, sheet_name='Sheet3', header=0)
+    df = pd.read_excel(FilePath, sheet_name='Duty Time', header=8)
+    df2 = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
     df = df[~df['Login'].isin(df2['1099 Drivers'])]
 
     # Removes empty columns
     df.replace("", "NaN", inplace=True)
     df.dropna(subset=['Login'], inplace=True)
 
-    # Prints the adjusted data frame to a new Excel sheet
-    ExcelWorkbook = load_workbook(FilePath)
-    writer = pd.ExcelWriter(FilePath, engine='openpyxl')
-    writer.book = ExcelWorkbook
-    df.to_excel(writer, sheet_name='Output')
+    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+    #     print(df)
 
+    #Print DF
+    writer = pd.ExcelWriter(FilePath, engine='openpyxl')  # TODO: REPLACES FILE!!!!
+    df.to_excel(writer, sheet_name='Output')
     writer.save()
-    writer.close()
+
 
 def formatCols(FilePath):
     workbook = openpyxl.load_workbook(FilePath)
@@ -78,6 +78,7 @@ if __name__ == '__main__':
     path = input()
     if '"' in path:
         path = path.replace('"', '')
+    print("Starting HOS Timecard Creation, this may take a few moments...")
     deleteRows(path)
     formatCols(path)
     print("Task Completed!")
