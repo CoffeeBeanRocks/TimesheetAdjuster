@@ -3,9 +3,9 @@
 # Phone#: 847-212-2264
 # @Date: 06/13/2022
 
-# This script takes a path to an excel file
-# and outputs an excel sheet that filters all names
-# that are not on the acceptable 1099 driver list
+# This script takes a path to an Excel file
+# and outputs an Excel sheet that filters all names
+# that are on the 1099 driver list
 
 import pandas as pd
 from openpyxl import load_workbook
@@ -14,12 +14,16 @@ from openpyxl.styles import numbers, PatternFill
 
 
 def deleteRows(FilePath):
-    # Use pandas library to get the data from the excel sheet
+    # Gets data from Excel sheet and removes elements that are in the 1099 drivers list
     df = pd.read_excel(FilePath, sheet_name='Import', header=1)
     df2 = pd.read_excel(FilePath, sheet_name='Sheet3', header=0)
-    df = df[df['Login'].isin(df2['1099 Drivers'])]
+    df = df[~df['Login'].isin(df2['1099 Drivers'])]
 
-    # Use pandas library to remove elements not in the 1099 drivers list
+    # Removes empty columns
+    df.replace("", "NaN", inplace=True)
+    df.dropna(subset=['Login'], inplace=True)
+
+    # Prints the adjusted data frame to a new Excel sheet
     ExcelWorkbook = load_workbook(FilePath)
     writer = pd.ExcelWriter(FilePath, engine='openpyxl')
     writer.book = ExcelWorkbook
@@ -32,7 +36,7 @@ def formatCols(FilePath):
     workbook = openpyxl.load_workbook(FilePath)
     worksheet = workbook['Output']
 
-    # Using openpyxl to format the new excel sheet
+    # Using openpyxl to format the new Excel sheet
     for cell in worksheet['E']:
         cell.number_format = numbers.FORMAT_DATE_XLSX14
     for cell in worksheet['H']:
@@ -54,7 +58,7 @@ def formatCols(FilePath):
     # Alternates filling each row based off of a new username
     yellowFill = PatternFill(start_color='00FFFF00', end_color='00FFFF00', fill_type='solid')
     currentName = worksheet['C2'].value
-    fill = True
+    fill = False
     for i in range(2, worksheet.max_row+1):
         if worksheet.cell(row=i, column=3).value == currentName and fill:
             for j in range(3, worksheet.max_column+1):
