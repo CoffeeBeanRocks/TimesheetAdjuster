@@ -13,17 +13,107 @@ import openpyxl
 from openpyxl.styles import numbers, PatternFill
 
 
+def get1099Drivrs():
+    logins = [
+        'cculp',
+        'jlorden',
+        'fherron',
+        'ekotlarz',
+        'ssetterlund',
+        'kjohnson',
+        'rgrover',
+        'mmartin',
+        'gkozlowski',
+        'zkaczmarczyk',
+        'bmihaylov',
+        'kslupek',
+        'ibuzinskis',
+        'PWALAWSKI',
+        'VDIMITROV',
+        'mrudzinski',
+        'aszymanski',
+        'awiech',
+        'mwiechetek',
+        'awolak',
+        'mzareba',
+        'shicks',
+        'sutterback',
+        'ffrench',
+        'jgrzesiak',
+        'bgal',
+        'jmitchell',
+        'kpopek',
+        'mlooney',
+        'sgorczyca',
+        'jhaynie',
+        'epetrov',
+        'lbronikowski',
+        'rgranados',
+        'kpodstawka',
+        'rbanas',
+        'khadera',
+        'rpettis',
+        'aplecki',
+        'kwasowicz',
+        'kbryja',
+        'jsadkowski',
+        'jlukacs',
+        'miwaniec',
+        'tcachro',
+        'rsingh',
+        'dgornikowski',
+        'michaelj',
+        'lbalinski',
+        'rkokot',
+        'dzajac',
+        'sspear',
+        'tbrown',
+        'sbliznakov',
+        'jfoxx',
+        'skahlon',
+        'bmontgomery',
+        'jhernandez',
+        'dbooker',
+        'tvarela',
+        'rwyrick',
+        'rwade',
+        'hhernandez',
+        'jrzepka',
+        'dfidowski',
+        'nlewis',
+        'mholder',
+        'jchavez',
+        'brobbins',
+        'smartinez',
+        'rpetraitis',
+        'saddison',
+        'tthompson',
+        'eagbenyadzi',
+        'iasenov',
+        'ccortes',
+        'omara',
+        'jramirez',
+        'aradon',
+        'apatino',
+        'awilliams',
+        'psoja',
+        'ccardona'
+    ]
+    drivers = pd.DataFrame(logins, columns=['1099 Drivers'])
+    return drivers
+
 def deleteRows(FilePath):
     # Gets data from Excel sheet and removes elements that are in the 1099 drivers list
     df = pd.read_excel(FilePath, sheet_name='Duty Time', header=8)
-    df2 = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
+    #df2 = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
+    df2 = get1099Drivrs()
     df = df[~df['Login'].isin(df2['1099 Drivers'])]
 
     # Removes empty columns
     df.replace("", "NaN", inplace=True)
     df.dropna(subset=['Login'], inplace=True)
 
-    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):
     #     print(df)
 
     #Print DF
@@ -82,5 +172,6 @@ if __name__ == '__main__':
     deleteRows(path)
     formatCols(path)
     print("Task Completed!")
+    input("Press enter to finish: ")
 
 
