@@ -104,19 +104,22 @@ def get1099Drivrs():
 def deleteRows(FilePath):
     # Gets data from Excel sheet and removes elements that are in the 1099 drivers list
     df = pd.read_excel(FilePath, sheet_name='Duty Time', header=8)
-    #df2 = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
+    # df2 = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
     df2 = get1099Drivrs()
     df = df[~df['Login'].isin(df2['1099 Drivers'])]
 
     # Removes empty columns
     df.replace("", "NaN", inplace=True)
     df.dropna(subset=['Login'], inplace=True)
+
+    # Removes mystery total column
     del df['Total']
+    del df['Unnamed: 0']
 
     # with pd.option_context('display.max_rows', None, 'display.max_columns', None):
     #     print(df)
 
-    #Print DF
+    # Print DF
     writer = pd.ExcelWriter(FilePath, engine='openpyxl')  # TODO: REPLACES FILE!!!!
     df.to_excel(writer, sheet_name='Output')
     writer.save()
@@ -127,6 +130,8 @@ def formatCols(FilePath):
     worksheet = workbook['Output']
 
     # Using openpyxl to format the new Excel sheet
+
+    # Format Source Code: https://openpyxl.readthedocs.io/en/stable/_modules/openpyxl/styles/numbers.html
     for cell in worksheet['E']:
         cell.number_format = numbers.FORMAT_DATE_XLSX14
     for cell in worksheet['H']:
@@ -137,28 +142,30 @@ def formatCols(FilePath):
     for cell in worksheet['I']:
         cell.number_format = numbers.FORMAT_DATE_TIME1
 
+    worksheet.column_dimensions['B'].width = 20
     worksheet.column_dimensions['C'].width = 20
     worksheet.column_dimensions['D'].width = 20
     worksheet.column_dimensions['E'].width = 20
     worksheet.column_dimensions['F'].width = 20
     worksheet.column_dimensions['G'].width = 20
     worksheet.column_dimensions['H'].width = 20
-    worksheet.column_dimensions['I'].width = 20
+
 
     # Alternates filling each row based off of a new username
     yellowFill = PatternFill(start_color='00FFFF00', end_color='00FFFF00', fill_type='solid')
-    currentName = worksheet['C2'].value
+    currentName = worksheet['B2'].value
+    colIndex = 2
     fill = False
     for i in range(2, worksheet.max_row+1):
-        if worksheet.cell(row=i, column=3).value == currentName and fill:
-            for j in range(3, worksheet.max_column+1):
+        if worksheet.cell(row=i, column=colIndex).value == currentName and fill:
+            for j in range(colIndex, worksheet.max_column):
                 worksheet.cell(row=i, column=j).fill = yellowFill
         else:
-            if worksheet.cell(row=i, column=3).value != currentName:
+            if worksheet.cell(row=i, column=colIndex).value != currentName:
                 fill = not fill
-                currentName = worksheet.cell(row=i, column=3).value
+                currentName = worksheet.cell(row=i, column=colIndex).value
                 if fill:
-                    for j in range(3, worksheet.max_column+1):
+                    for j in range(colIndex, worksheet.max_column):
                         worksheet.cell(row=i, column=j).fill = yellowFill
 
     workbook.save(FilePath)
