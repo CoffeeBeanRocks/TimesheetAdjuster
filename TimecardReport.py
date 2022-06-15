@@ -132,14 +132,14 @@ def formatCols(FilePath):
     # Using openpyxl to format the new Excel sheet
 
     # Format Source Code: https://openpyxl.readthedocs.io/en/stable/_modules/openpyxl/styles/numbers.html
-    for cell in worksheet['E']:
+    for cell in worksheet['D']:
         cell.number_format = numbers.FORMAT_DATE_XLSX14
-    for cell in worksheet['H']:
+    for cell in worksheet['G']:
         cell.number_format = numbers.FORMAT_DATE_XLSX14
 
-    for cell in worksheet['F']:
+    for cell in worksheet['E']:
         cell.number_format = numbers.FORMAT_DATE_TIME1
-    for cell in worksheet['I']:
+    for cell in worksheet['H']:
         cell.number_format = numbers.FORMAT_DATE_TIME1
 
     worksheet.column_dimensions['B'].width = 20
@@ -158,14 +158,14 @@ def formatCols(FilePath):
     fill = False
     for i in range(2, worksheet.max_row+1):
         if worksheet.cell(row=i, column=colIndex).value == currentName and fill:
-            for j in range(colIndex, worksheet.max_column):
+            for j in range(colIndex, worksheet.max_column+1):
                 worksheet.cell(row=i, column=j).fill = yellowFill
         else:
             if worksheet.cell(row=i, column=colIndex).value != currentName:
                 fill = not fill
                 currentName = worksheet.cell(row=i, column=colIndex).value
                 if fill:
-                    for j in range(colIndex, worksheet.max_column):
+                    for j in range(colIndex, worksheet.max_column+1):
                         worksheet.cell(row=i, column=j).fill = yellowFill
 
     workbook.save(FilePath)
