@@ -102,6 +102,9 @@ def get1099Drivrs():
     drivers = pd.DataFrame(logins, columns=['1099 Drivers'])
     return drivers
 
+def colored(r, g, b, text):
+    return "\033[38;2;{};{};{}m{} \033[38;2;255;255;255m".format(r, g, b, text)
+
 def deleteRows(FilePath):
     # Gets data from Excel sheet and removes elements that are in the 1099 drivers list
     df = pd.read_excel(FilePath, sheet_name='Duty Time', header=8)
@@ -169,9 +172,15 @@ if __name__ == '__main__':
     if '"' in path:
         path = path.replace('"', '')
     print("Starting HOS Timecard Creation, this may take a few moments...")
-    deleteRows(path)
-    formatCols(path)
-    print("Task Completed!")
+    try:
+        deleteRows(path)
+        formatCols(path)
+        print("Task Completed!")
+    except Exception as e:
+        if "Errno 13" in str(e):
+            print(colored(255, 0, 0, "Please close the file and try again!"))
+        else:
+            print(colored(255, 0, 0, "An unknown error occurred:"), e)
     input("Press enter to finish: ")
 
 
