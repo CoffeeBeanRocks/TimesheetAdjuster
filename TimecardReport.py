@@ -196,9 +196,8 @@ def formatCols(FilePath):
     workbook.save(FilePath)
 
 if __name__ == '__main__':
-    # TODO: Make instructions more clear
-    print("Instructions: ", "1) Make a copy of the HOS Timecard File", "2) Hold shift and right click the Copy of the HOS Timecard File", "3) Find and click, \"Copy as path\"", sep='\n')
-    print("4) Paste the file path to the Copy here and press enter: ")
+    print("Instructions: ", "1) Find the timecard sheet in file-explorer or on the desktop", "2) Right click the file and select, \"Copy\"", "3) Right click in file-explorer or on the desktop and select, \"Paste\"", "4) Right click the copied file and select, \"Copy as path\"", sep='\n')
+    print("5) You've just copied the file-path to your clipboard, press \"CTRL V\" and paste the path below. Then press enter: ")
     path = input()
     if '"' in path:
         path = path.replace('"', '')
@@ -212,6 +211,6 @@ if __name__ == '__main__':
             print("Please close the file and try again!")
         else:
             print("An unknown error occurred:", e)
-    input("5) Press enter to finish: ")
+    input("\nPress enter to finish: ")
 
 
