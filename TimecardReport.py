@@ -170,6 +170,7 @@ def formatCols(FilePath):
                     for j in range(colIndex, worksheet.max_column+1):
                         worksheet.cell(row=i, column=j).fill = yellowFill
 
+    # Adds time total column
     redFill = PatternFill(start_color='00FC0303', end_color='00FC0303', fill_type='solid')
     orangeFill = PatternFill(start_color='00FAAC02', end_color='00FAAC02', fill_type='solid')
     currentName = worksheet['B2'].value
