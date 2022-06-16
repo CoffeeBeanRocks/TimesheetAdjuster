@@ -11,6 +11,8 @@ import pandas as pd
 from openpyxl import load_workbook
 import openpyxl
 from openpyxl.styles import numbers, PatternFill
+from datetime import datetime, timedelta
+
 
 def get1099Drivrs():
     logins = [
@@ -120,7 +122,7 @@ def deleteRows(FilePath):
     #     print(df)
 
     # Print DF
-    writer = pd.ExcelWriter(FilePath, engine='openpyxl')  # TODO: REPLACES FILE!!!!
+    writer = pd.ExcelWriter(FilePath, engine='openpyxl')
     df.to_excel(writer, sheet_name='Output')
     writer.save()
 
@@ -138,9 +140,9 @@ def formatCols(FilePath):
         cell.number_format = numbers.FORMAT_DATE_XLSX14
 
     for cell in worksheet['E']:
-        cell.number_format = numbers.FORMAT_DATE_TIME1
+        cell.number_format = numbers.FORMAT_DATE_TIME2
     for cell in worksheet['H']:
-        cell.number_format = numbers.FORMAT_DATE_TIME1
+        cell.number_format = numbers.FORMAT_DATE_TIME2
 
     worksheet.column_dimensions['B'].width = 20
     worksheet.column_dimensions['C'].width = 20
@@ -168,9 +170,33 @@ def formatCols(FilePath):
                     for j in range(colIndex, worksheet.max_column+1):
                         worksheet.cell(row=i, column=j).fill = yellowFill
 
+    redFill = PatternFill(start_color='00FC0303', end_color='00FC0303', fill_type='solid')
+    orangeFill = PatternFill(start_color='00FAAC02', end_color='00FAAC02', fill_type='solid')
+    currentName = worksheet['B2'].value
+    startIndex = 2
+    fill = False
+    for i in range(2, worksheet.max_row + 2):
+        if worksheet.cell(row=i, column=colIndex).value != currentName:
+            currentName = worksheet.cell(row=i, column=colIndex).value
+            total = timedelta(hours=0)
+            for j in range(startIndex, i):
+                s1 = str(worksheet.cell(row=j, column=5).value)
+                startTime = datetime.strptime(s1, '%Y-%m-%d %H:%M:%S')
+                s2 = str(worksheet.cell(row=j, column=8).value)
+                endTime = datetime.strptime(s2, '%Y-%m-%d %H:%M:%S')
+                total = total + (endTime-startTime)
+            worksheet.cell(row=i - 1, column=9).value = total
+            if fill:
+                worksheet.cell(row=i - 1, column=9).fill = orangeFill
+            else:
+                worksheet.cell(row=i - 1, column=9).fill = redFill
+            fill = not fill
+            startIndex = i
+
     workbook.save(FilePath)
 
 if __name__ == '__main__':
+    # TODO: Make instructions more clear
     print("Instructions: ", "1) Make a copy of the HOS Timecard File", "2) Hold shift and right click the Copy of the HOS Timecard File", "3) Find and click, \"Copy as path\"", sep='\n')
     print("4) Paste the file path to the Copy here and press enter: ")
     path = input()
