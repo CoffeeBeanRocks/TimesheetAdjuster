@@ -197,9 +197,9 @@ def formatCols(FilePath):
     workbook.save(FilePath)
 
 if __name__ == '__main__':
-    print("Instructions: ", "1) Find the timecard sheet in file-explorer or on the desktop", "2) Right click the file and select, \"Copy\"", "3) Right click in file-explorer or on the desktop and select, \"Paste\"", "4) Right click the copied file and select, \"Copy as path\"", sep='\n')
-    print("5) You've just copied the file-path to your clipboard, press \"CTRL V\" and paste the path below. Then press enter: ")
-    path = input()
+    print("Instructions: ", "Before running the program make sure the relevant Excel file is closed", "1) Find the timecard sheet in file-explorer or on the desktop", "2) Right click the file and select, \"Copy\"", "3) Right click in file-explorer or on the desktop and select, \"Paste\"", "4) Hold shift then right click the copied file and select, \"Copy as path\"", sep='\n')
+    print("5) You've just copied the file-path to your clipboard, press \"CTRL V\" and paste the path below. Then press enter")
+    path = input("Paste on this line here: ")
     if '"' in path:
         path = path.replace('"', '')
     try:
