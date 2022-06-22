@@ -10,9 +10,38 @@ import sys
 
 import pandas as pd
 from openpyxl import load_workbook
+import numpy as np
 import openpyxl
 from openpyxl.styles import numbers, PatternFill
 from datetime import datetime, timedelta
+
+# TODO: Update W4 from new excel sheet, then write that list to the txt
+def excelToTxt():
+    print("The sheet name for the list with the drivers must be named \"Sheet1\" and there should be a header at A1 titled \"W4 Drivers\"")
+    FilePath = input("Enter the path to the W4 drivers here: ")
+    df = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
+    np.savetxt(r'usernames.txt', df['W4 Drivers'].values, fmt='%s')
+
+def printW4():
+    with open('usernames.txt', 'r') as f:
+        print(f.read())
+        f.close()
+
+def deleteW4():
+    name = input("Enter the name to be removed: ")
+    with open("usernames.txt", "r") as f:
+        lines = f.readlines()
+    with open("usernames.txt", "w") as f:
+        for line in lines:
+            if line.strip("\n").lower() != name.lower():
+                f.write(line)
+    printW4()
+
+def addW4():
+    with open('usernames.txt', 'a') as f:
+        f.write(input("Enter New Name: ")+"\n")
+        f.close()
+    printW4()
 
 def getW4():
     # TODO: Add JSON to add and subtract names
@@ -150,9 +179,13 @@ if __name__ == '__main__':
     path = input("Paste on this line here: ")
     if '"' in path:
         path = path.replace('"', '')
-    elif "-v" in path:
-        print("\n", getW4())
-        input("\nPress enter to finish: ")
+    elif "-v" == path:
+        printW4()
+        # input("\nPress enter to finish: ")
+        sys.exit("Finished!")
+    elif "-e" == path:
+        excelToTxt()
+        #input("\nPress enter to finish: ")
         sys.exit("Finished!")
     try:
         print("Formatting File, Please Wait!")
