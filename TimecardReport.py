@@ -14,8 +14,8 @@ import openpyxl
 from openpyxl.styles import numbers, PatternFill
 from datetime import datetime, timedelta
 
-
 def getW4():
+    # TODO: Add JSON to add and subtract names
     logins = [
         'MADAMS',
         'MBATTEN ',
@@ -28,10 +28,8 @@ def getW4():
         'CGILFORD',
         'HGLICKSON',
         'GHERNANDEZ',
-        'FHERRON',  # DNE
         'JKANIEWSKI',
         'LKANIEWSKI',
-        'JLORDEN',
         'HMADRID',
         'PMELHORN',
         'MNOWAKOWSKI',
@@ -40,10 +38,9 @@ def getW4():
         'KRIBAJ',
         'HSALGADO',
         'FSANCHEZ ',
-        'SSETTERLUND',
         'CTHOMPSON',
         'VVALAC',
-        'PWOJDILA',  # DNE
+        'PWOJDILA',
         'RCOVER',
         'RGROVER',
         'JMARTIN',
@@ -53,7 +50,6 @@ def getW4():
     for i in range(len(logins)):
         logins[i] = logins[i].lower()
     drivers = pd.DataFrame(logins, columns=['W4 Drivers'])
-    # print(drivers)
     return drivers
 
 def deleteRows(FilePath):
@@ -104,7 +100,6 @@ def formatCols(FilePath):
     worksheet.column_dimensions['F'].width = 20
     worksheet.column_dimensions['G'].width = 20
     worksheet.column_dimensions['H'].width = 20
-
 
     # Alternates filling each row based off of a new username
     yellowFill = PatternFill(start_color='00FFFF00', end_color='00FFFF00', fill_type='solid')
