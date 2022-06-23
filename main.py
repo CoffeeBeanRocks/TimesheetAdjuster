@@ -11,11 +11,26 @@ import os
 import sys
 import pandas as pd
 import pickle
-from openpyxl import load_workbook
-import numpy as np
+from os.path import exists
 import openpyxl
 from openpyxl.styles import numbers, PatternFill
 from datetime import datetime, timedelta
+
+# TODO: Convert From Pickle to xlsx
+class Data:
+    dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
+    w4Path = '%sDrivers.xlsx' % dir_path
+
+def loadData():
+    dir_path = '%s\\HOSFilter\\' %  os.environ['APPDATA']
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
+    file_path = '%sDrivers.xlsx' % dir_path
+    if not exists(file_path):
+        print('List of W4 Drivers not found, please enter new list!')
+        with open(file_path, 'wb') as p:
+            pickle.dump(excelToTxt(), p)
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -27,74 +42,66 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-# TODO: Update W4 from new excel sheet, then write that list to the txt
 def excelToTxt():
     print("The sheet name for the list with the drivers must be named \"Sheet1\" and there should be a header at A1 titled \"W4 Drivers\"")
     FilePath = input("Enter the path to the W4 drivers here: ")
     if '"' in FilePath:
         FilePath = FilePath.replace('"', '')
     df = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
-    #np.savetxt(resource_path('usernames.txt'), df['W4 Drivers'].values, fmt='%s')
-    with open(resource_path('mypickle.pk'), 'wb') as p:
-        pickle.dump(df, p)
+    with open(Data.w4Path, 'wb') as p:
+        pickle.dump(df, p)  # TODO: write Data Frame to Drivers.xlsx
 
 def printW4():
-    with open(resource_path('mypickle.pk'), 'rb') as p:
-        print(pickle.load(p))
-
-def deleteW4():
-    name = input("Enter the name to be removed: ")
-    with open("usernames.txt", "r") as f:
-        lines = f.readlines()
-    with open("usernames.txt", "w") as f:
-        for line in lines:
-            if line.strip("\n").lower() != name.lower():
-                f.write(line)
-    printW4()
-
-def addW4():
-    with open('usernames.txt', 'a') as f:
-        f.write(input("Enter New Name: ")+"\n")
-        f.close()
-    printW4()
+    print(getW4())
+    # with open(Data.w4Path, 'rb') as p:
+    #     print(pickle.load(p))
 
 def getW4():
-    # TODO: Add JSON to add and subtract names
-    logins = [
-        'MADAMS',
-        'MBATTEN ',
-        'ACOBBS',
-        'TDANIELUK',
-        'VDAVIS',
-        'FDOMINGUEZ',
-        'JFRAGASSI',
-        'AGILFORD',
-        'CGILFORD',
-        'HGLICKSON',
-        'GHERNANDEZ',
-        'JKANIEWSKI',
-        'LKANIEWSKI',
-        'HMADRID',
-        'PMELHORN',
-        'MNOWAKOWSKI',
-        'OMARA',
-        'MREED ',
-        'KRIBAJ',
-        'HSALGADO',
-        'FSANCHEZ ',
-        'CTHOMPSON',
-        'VVALAC',
-        'PWOJDILA',
-        'RCOVER',
-        'RGROVER',
-        'JMARTIN',
-        'JRUDE',
-        'PWHALEN'
-    ]
+    if not exists(Data.w4Path):
+        loadData()
+
+    with open(Data.w4Path, 'rb') as p:
+        logins = pickle.load(p)
     for i in range(len(logins)):
         logins[i] = logins[i].lower()
     drivers = pd.DataFrame(logins, columns=['W4 Drivers'])
     return drivers
+
+    # logins = [
+    #     'MADAMS',
+    #     'MBATTEN ',
+    #     'ACOBBS',
+    #     'TDANIELUK',
+    #     'VDAVIS',
+    #     'FDOMINGUEZ',
+    #     'JFRAGASSI',
+    #     'AGILFORD',
+    #     'CGILFORD',
+    #     'HGLICKSON',
+    #     'GHERNANDEZ',
+    #     'JKANIEWSKI',
+    #     'LKANIEWSKI',
+    #     'HMADRID',
+    #     'PMELHORN',
+    #     'MNOWAKOWSKI',
+    #     'OMARA',
+    #     'MREED ',
+    #     'KRIBAJ',
+    #     'HSALGADO',
+    #     'FSANCHEZ ',
+    #     'CTHOMPSON',
+    #     'VVALAC',
+    #     'PWOJDILA',
+    #     'RCOVER',
+    #     'RGROVER',
+    #     'JMARTIN',
+    #     'JRUDE',
+    #     'PWHALEN'
+    # ]
+    # for i in range(len(logins)):
+    #     logins[i] = logins[i].lower()
+    # drivers = pd.DataFrame(logins, columns=['W4 Drivers'])
+    # return drivers
 
 def deleteRows(FilePath):
     # Gets data from Excel sheet and removes elements that are in the 1099 drivers list
@@ -200,6 +207,10 @@ if __name__ == '__main__':
         sys.exit("Finished!")
     elif "-e" == path:
         excelToTxt()
+        #input("\nPress enter to finish: ")
+        sys.exit("Finished!")
+    elif "-c" == path:
+        loadData()
         #input("\nPress enter to finish: ")
         sys.exit("Finished!")
     try:
