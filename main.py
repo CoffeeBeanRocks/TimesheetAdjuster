@@ -6,26 +6,41 @@
 # This script takes a path to an Excel file
 # and outputs an Excel sheet that filters all names
 # that are on the 1099 driver list
-import sys
 
+import os
+import sys
 import pandas as pd
+import pickle
 from openpyxl import load_workbook
 import numpy as np
 import openpyxl
 from openpyxl.styles import numbers, PatternFill
 from datetime import datetime, timedelta
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
+
+    return os.path.join(base_path, relative_path)
+
 # TODO: Update W4 from new excel sheet, then write that list to the txt
 def excelToTxt():
     print("The sheet name for the list with the drivers must be named \"Sheet1\" and there should be a header at A1 titled \"W4 Drivers\"")
     FilePath = input("Enter the path to the W4 drivers here: ")
+    if '"' in FilePath:
+        FilePath = FilePath.replace('"', '')
     df = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
-    np.savetxt(r'usernames.txt', df['W4 Drivers'].values, fmt='%s')
+    #np.savetxt(resource_path('usernames.txt'), df['W4 Drivers'].values, fmt='%s')
+    with open(resource_path('mypickle.pk'), 'wb') as p:
+        pickle.dump(df, p)
 
 def printW4():
-    with open('usernames.txt', 'r') as f:
-        print(f.read())
-        f.close()
+    with open(resource_path('mypickle.pk'), 'rb') as p:
+        print(pickle.load(p))
 
 def deleteW4():
     name = input("Enter the name to be removed: ")
