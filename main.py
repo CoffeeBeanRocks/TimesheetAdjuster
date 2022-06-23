@@ -29,42 +29,24 @@ def loadData():
     file_path = '%sDrivers.xlsx' % dir_path
     if not exists(file_path):
         print('List of W4 Drivers not found, please enter new list!')
-        with open(file_path, 'wb') as p:
-            pickle.dump(excelToTxt(), p)
+        copyXLSX(input("Enter new W4 list: "))
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
 
-    return os.path.join(base_path, relative_path)
-
-def excelToTxt():
-    print("The sheet name for the list with the drivers must be named \"Sheet1\" and there should be a header at A1 titled \"W4 Drivers\"")
-    FilePath = input("Enter the path to the W4 drivers here: ")
-    if '"' in FilePath:
-        FilePath = FilePath.replace('"', '')
+def copyXLSX(FilePath):
     df = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
-    with open(Data.w4Path, 'wb') as p:
-        pickle.dump(df, p)  # TODO: write Data Frame to Drivers.xlsx
+    writer = pd.ExcelWriter(Data.w4Path, engine='openpyxl')  # Assumes HOSFilter folder has already been created
+    df.to_excel(writer, sheet_name='Sheet1', index=False)
+    writer.save()
 
 def printW4():
     print(getW4())
-    # with open(Data.w4Path, 'rb') as p:
-    #     print(pickle.load(p))
 
 def getW4():
     if not exists(Data.w4Path):
         loadData()
 
-    with open(Data.w4Path, 'rb') as p:
-        logins = pickle.load(p)
-    for i in range(len(logins)):
-        logins[i] = logins[i].lower()
-    drivers = pd.DataFrame(logins, columns=['W4 Drivers'])
+    drivers = pd.read_excel(Data.w4Path, sheet_name='Sheet1', header=0)
+    drivers['W4 Drivers'] = drivers['W4 Drivers'].str.lower()
     return drivers
 
     # logins = [
@@ -102,6 +84,16 @@ def getW4():
     #     logins[i] = logins[i].lower()
     # drivers = pd.DataFrame(logins, columns=['W4 Drivers'])
     # return drivers
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
+
+    return os.path.join(base_path, relative_path)
 
 def deleteRows(FilePath):
     # Gets data from Excel sheet and removes elements that are in the 1099 drivers list
@@ -204,10 +196,6 @@ if __name__ == '__main__':
     elif "-v" == path:
         printW4()
         # input("\nPress enter to finish: ")
-        sys.exit("Finished!")
-    elif "-e" == path:
-        excelToTxt()
-        #input("\nPress enter to finish: ")
         sys.exit("Finished!")
     elif "-c" == path:
         loadData()
