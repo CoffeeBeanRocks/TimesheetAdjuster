@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 
 class Data:
     dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
-    w4Path = '%sDrivers.xlsx' % dir_path
+    w2Path = '%sDrivers.xlsx' % dir_path
 
 def loadData():
     dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
@@ -26,24 +26,24 @@ def loadData():
 
     file_path = '%sDrivers.xlsx' % dir_path
     if not exists(file_path):
-        print('List of W4 Drivers not found, please enter new list!')
-        copyXLSX(input("Enter new W4 list: "))
-
+        print('List of W2 Drivers not found, please enter new list!')
+        copyXLSX(input("Enter new W2 list: "))
 
 def copyXLSX(FilePath):
     if '"' in FilePath:
         FilePath = FilePath.replace('"', '')
     df = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
-    writer = pd.ExcelWriter(Data.w4Path, engine='openpyxl')  # Assumes HOSFilter folder has already been created
+    writer = pd.ExcelWriter(Data.w2Path, engine='openpyxl')
+    df.columns = ["W2 Drivers"]
     df.to_excel(writer, sheet_name='Sheet1', index=False)
     writer.save()
 
-def getW4():
-    if not exists(Data.w4Path):
+def getW2():
+    if not exists(Data.w2Path):
         loadData()
 
-    drivers = pd.read_excel(Data.w4Path, sheet_name='Sheet1', header=0)
-    drivers['W4 Drivers'] = drivers['W4 Drivers'].str.lower()
+    drivers = pd.read_excel(Data.w2Path, sheet_name='Sheet1', header=0)
+    drivers['W2 Drivers'] = drivers['W2 Drivers'].str.lower()
     return drivers
 
 def resource_path(relative_path):
@@ -52,7 +52,7 @@ def resource_path(relative_path):
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
     except Exception:
-        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
+        base_path = os.environ.get("_MEIPASS2", os.path.abspath("."))
 
     return os.path.join(base_path, relative_path)
 
@@ -60,8 +60,8 @@ def deleteRows(FilePath):
     # Gets data from Excel sheet and removes elements that are in the 1099 drivers list
     df = pd.read_excel(FilePath, sheet_name='Duty Time', header=8)
     # df2 = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
-    df2 = getW4()
-    df = df[df['Login'].str.lower().isin(df2['W4 Drivers'])]
+    df2 = getW2()
+    df = df[df['Login'].str.lower().isin(df2['W2 Drivers'])]
 
     # Removes empty columns
     df.replace("", "NaN", inplace=True)
@@ -155,13 +155,13 @@ if __name__ == '__main__':
     if '"' in path:
         path = path.replace('"', '')
     elif "-v" == path:
-        print(getW4())
+        print(getW2())
         input("\nPress enter to finish: ")
         sys.exit("Finished!")
     elif "-c" == path:
-        print('W4 list amendment mode, please enter new list!')
+        print('W2 list amendment mode, please enter new list!')
         print('All data must be on a sheet titled "Sheet1" and have a header at "A0" followed by the data')
-        copyXLSX(input("Enter new W4 list: "))
+        copyXLSX(input("Enter new W2 list: "))
         input("\nPress enter to finish: ")
         sys.exit("Finished!")
     try:
