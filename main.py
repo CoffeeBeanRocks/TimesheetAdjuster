@@ -10,19 +10,17 @@
 import os
 import sys
 import pandas as pd
-import pickle
 from os.path import exists
 import openpyxl
 from openpyxl.styles import numbers, PatternFill
 from datetime import datetime, timedelta
 
-# TODO: Convert From Pickle to xlsx
 class Data:
     dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
     w4Path = '%sDrivers.xlsx' % dir_path
 
 def loadData():
-    dir_path = '%s\\HOSFilter\\' %  os.environ['APPDATA']
+    dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
@@ -33,13 +31,12 @@ def loadData():
 
 
 def copyXLSX(FilePath):
+    if '"' in FilePath:
+        FilePath = FilePath.replace('"', '')
     df = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
     writer = pd.ExcelWriter(Data.w4Path, engine='openpyxl')  # Assumes HOSFilter folder has already been created
     df.to_excel(writer, sheet_name='Sheet1', index=False)
     writer.save()
-
-def printW4():
-    print(getW4())
 
 def getW4():
     if not exists(Data.w4Path):
@@ -106,7 +103,7 @@ def deleteRows(FilePath):
     df.replace("", "NaN", inplace=True)
     df.dropna(subset=['Login'], inplace=True)
 
-    # Removes mystery total column
+    # Removes total column and unnamed column
     del df['Total']
     del df['Unnamed: 0']
 
@@ -117,7 +114,6 @@ def deleteRows(FilePath):
     writer = pd.ExcelWriter(FilePath, engine='openpyxl')
     df.to_excel(writer, sheet_name='Output')
     writer.save()
-
 
 def formatCols(FilePath):
     workbook = openpyxl.load_workbook(FilePath)
@@ -188,18 +184,19 @@ def formatCols(FilePath):
     workbook.save(FilePath)
 
 if __name__ == '__main__':
+    loadData()
     print("Instructions: ", "Before running the program make sure the relevant Excel file is closed", "1) Find the timecard sheet in file-explorer or on the desktop", "2) Right click the file and select, \"Copy\"", "3) Right click in file-explorer or on the desktop and select, \"Paste\"", "4) Hold shift then right click the copied file and select, \"Copy as path\"", sep='\n')
     print("5) You've just copied the file-path to your clipboard, press \"CTRL V\" and paste the path below. Then press enter")
     path = input("Paste on this line here: ")
     if '"' in path:
         path = path.replace('"', '')
     elif "-v" == path:
-        printW4()
-        # input("\nPress enter to finish: ")
+        print(getW4())
         sys.exit("Finished!")
     elif "-c" == path:
-        loadData()
-        #input("\nPress enter to finish: ")
+        print('W4 list amendment mode, please enter new list!')
+        print('All data must be on a sheet titled "Sheet1" and have a header at "A0" followed by the data')
+        copyXLSX(input("Enter new W4 list: "))
         sys.exit("Finished!")
     try:
         print("Formatting File, Please Wait!")
