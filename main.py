@@ -46,42 +46,6 @@ def getW4():
     drivers['W4 Drivers'] = drivers['W4 Drivers'].str.lower()
     return drivers
 
-    # logins = [
-    #     'MADAMS',
-    #     'MBATTEN ',
-    #     'ACOBBS',
-    #     'TDANIELUK',
-    #     'VDAVIS',
-    #     'FDOMINGUEZ',
-    #     'JFRAGASSI',
-    #     'AGILFORD',
-    #     'CGILFORD',
-    #     'HGLICKSON',
-    #     'GHERNANDEZ',
-    #     'JKANIEWSKI',
-    #     'LKANIEWSKI',
-    #     'HMADRID',
-    #     'PMELHORN',
-    #     'MNOWAKOWSKI',
-    #     'OMARA',
-    #     'MREED ',
-    #     'KRIBAJ',
-    #     'HSALGADO',
-    #     'FSANCHEZ ',
-    #     'CTHOMPSON',
-    #     'VVALAC',
-    #     'PWOJDILA',
-    #     'RCOVER',
-    #     'RGROVER',
-    #     'JMARTIN',
-    #     'JRUDE',
-    #     'PWHALEN'
-    # ]
-    # for i in range(len(logins)):
-    #     logins[i] = logins[i].lower()
-    # drivers = pd.DataFrame(logins, columns=['W4 Drivers'])
-    # return drivers
-
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
@@ -192,11 +156,13 @@ if __name__ == '__main__':
         path = path.replace('"', '')
     elif "-v" == path:
         print(getW4())
+        input("\nPress enter to finish: ")
         sys.exit("Finished!")
     elif "-c" == path:
         print('W4 list amendment mode, please enter new list!')
         print('All data must be on a sheet titled "Sheet1" and have a header at "A0" followed by the data')
         copyXLSX(input("Enter new W4 list: "))
+        input("\nPress enter to finish: ")
         sys.exit("Finished!")
     try:
         print("Formatting File, Please Wait!")
