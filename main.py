@@ -122,9 +122,9 @@ def formatCols(FilePath):
                         worksheet.cell(row=i, column=j).fill = yellowFill
 
     # Adds time total column #TODO: Incorrect Times Calculated!!!
-    # redFill = PatternFill(start_color='00FC0303', end_color='00FC0303', fill_type='solid')
-    # orangeFill = PatternFill(start_color='00FAAC02', end_color='00FAAC02', fill_type='solid')
-    # currentName = worksheet['B2'].value
+    redFill = PatternFill(start_color='00FC0303', end_color='00FC0303', fill_type='solid')
+    orangeFill = PatternFill(start_color='00FAAC02', end_color='00FAAC02', fill_type='solid')
+    # currentName = worksheet['A1'].value
     # startIndex = 2
     # fill = False
     # for i in range(2, worksheet.max_row + 2):
@@ -175,5 +175,3 @@ if __name__ == '__main__':
         else:
             print("An unknown error occurred:", e)
     input("\nPress enter to finish: ")
-
-
