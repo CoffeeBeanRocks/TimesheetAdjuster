@@ -8,26 +8,22 @@
 # that are on the 1099 driver list
 
 import os
-import sys
 import pandas as pd
 from os.path import exists
-import openpyxl
-from openpyxl.styles import numbers, PatternFill
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class Data:
     dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
     w2Path = '%sDrivers.xlsx' % dir_path
+    # w2Path = '%sDrivers - Copy.xlsx' % dir_path # TODO: Get list of first and last name
 
 
 def loadData():
-    dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
+    if not os.path.exists(Data.dir_path):
+        os.makedirs(Data.dir_path)
 
-    file_path = '%sDrivers.xlsx' % dir_path
-    if not exists(file_path):
+    if not exists(Data.w2Path):
         print('List of W2 Drivers not found, please enter new list!')
         copyXLSX(input("Enter new W2 list: "))
 
@@ -46,26 +42,35 @@ def getW2():
     if not exists(Data.w2Path):
         loadData()
 
-    drivers = pd.read_excel(Data.w2Path, sheet_name='Sheet1', converters={'Hours': str}, header=0)
-    drivers['W2 Drivers'] = drivers['W2 Drivers'].str.lower()
+    drivers = pd.read_excel(Data.w2Path, sheet_name='Sheet1', header=0)
+    drivers['W2 Drivers'] = drivers['W2 Drivers'].str.upper()
     return drivers
 
 
 def deleteRows(FilePath):
-    df = pd.read_excel(FilePath, sheet_name='Summary', header=7, index_col=False, date_parser="%H:%M:%S")
+    df = pd.read_excel(FilePath, sheet_name='Summary', header=7, index_col=False, dtype={'Hours': str})
     df.drop('Miles', axis=1, inplace=True)
     df.drop('Date', axis=1, inplace=True)
     df = df[df['Full Driver Name'].str.contains("Total") == True]
     for i in range(0, len(df.index)):
         index = df.iloc[i]['Full Driver Name'].index('Total')
         df.iloc[i]['Full Driver Name'] = df.iloc[i]['Full Driver Name'][0:index-1].upper()
+        try:
+            dt = datetime.strptime(df.iloc[i]['Hours'], '%Y-%m-%d %H:%M:%S')
+            df.iloc[i]['Hours'] = '{:02d}:{:02d}:{:02d}'.format((24 * dt.day)+dt.hour, dt.minute, dt.second)
+        except ValueError:
+            pass
+
     df.drop(df.tail(1).index, inplace=True)
 
-    print(df)
+    # TODO: Drop all people not on W2 list
 
-    writer = pd.ExcelWriter(FilePath, engine='openpyxl')
-    df.to_excel(writer, sheet_name='Output', index=False)
-    writer.save()
+    print(getW2())
+
+    # writer = pd.ExcelWriter(FilePath, engine='openpyxl')
+    # df.to_excel(writer, sheet_name='Output', index=False)
+    # writer.save()
+    # print('Finished')
 
 
 if __name__ == '__main__':
