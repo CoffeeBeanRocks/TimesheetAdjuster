@@ -16,8 +16,8 @@ from datetime import datetime
 
 class Data:
     dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
-    # w2Path = '%sDrivers.xlsx' % dir_path
-    w2Path = '%sDrivers - Copy.xlsx' % dir_path
+    w2Path = '%sDrivers.xlsx' % dir_path
+    # w2Path = '%sDrivers - Copy.xlsx' % dir_path
 
 
 def loadData():
@@ -64,6 +64,7 @@ def deleteRows(FilePath):
 
     df.drop(df.tail(1).index, inplace=True)
     df2 = getW2()
+    # TODO: Comparison with excel file isn't always accurate
     df = df[df['Full Driver Name'].str.upper().isin(df2['W2 Drivers'])]
 
     writer = pd.ExcelWriter(FilePath, engine='openpyxl')
@@ -74,8 +75,13 @@ def deleteRows(FilePath):
 
 if __name__ == '__main__':
     loadData()
-    print("Instructions: ", "Before running the program make sure the relevant Excel file is closed", "1) Find the timecard sheet in file-explorer or on the desktop", "2) Right click the file and select, \"Copy\"", "3) Right click in file-explorer or on the desktop and select, \"Paste\"", "4) Hold shift then right click the copied file and select, \"Copy as path\"", sep='\n')
-    print("5) You've just copied the file-path to your clipboard, press \"CTRL V\" and paste the path below. Then press enter")
+    print("Instructions: ", "Before running the program make sure the relevant Excel file is closed",
+          "1) Find the timecard sheet in file-explorer or on the desktop",
+          "2) Right click the file and select, \"Copy\"",
+          "3) Right click in file-explorer or on the desktop and select, \"Paste\"",
+          "4) Hold shift then right click the copied file and select, \"Copy as path\"", sep='\n')
+    print("5) You've just copied the file-path to your clipboard, press \"CTRL V\" and paste "
+          "the path below. Then press enter")
     # path = input("Paste on this line here: ")
     path = r"C:\Users\emeyers\Desktop\GigiPayroll - Copy.xlsx"
     if '"' in path:
