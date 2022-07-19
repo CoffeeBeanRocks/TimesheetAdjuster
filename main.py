@@ -64,7 +64,7 @@ def deleteRows(FilePath):
 
     df.drop(df.tail(1).index, inplace=True)
     df2 = getW2()
-    # TODO: Comparison with excel file isn't always accurate
+    # TODO: Comparison with excel file isn't always accurate (Hex: 0d0a [end of line] may be cause)
     df = df[df['Full Driver Name'].str.upper().isin(df2['W2 Drivers'])]
 
     writer = pd.ExcelWriter(FilePath, engine='openpyxl')
@@ -82,8 +82,8 @@ if __name__ == '__main__':
           "4) Hold shift then right click the copied file and select, \"Copy as path\"", sep='\n')
     print("5) You've just copied the file-path to your clipboard, press \"CTRL V\" and paste "
           "the path below. Then press enter")
-    # path = input("Paste on this line here: ")
-    path = r"C:\Users\emeyers\Desktop\GigiPayroll - Copy.xlsx"
+    path = input("Paste on this line here: ")
+    # path = r"C:\Users\emeyers\Desktop\GigiPayroll - Copy.xlsx"  # TODO: Remove test path
     if '"' in path:
         path = path.replace('"', '')
     elif "-v" == path:
@@ -99,7 +99,6 @@ if __name__ == '__main__':
     try:
         print("Formatting File, Please Wait!")
         deleteRows(path)
-        # formatCols(path)
         print("Task Completed!")
     except Exception as e:
         if "Errno 13" in str(e):
