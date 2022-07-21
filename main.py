@@ -13,32 +13,42 @@ import pandas as pd
 from os.path import exists
 import openpyxl
 from openpyxl.styles import numbers, PatternFill
-from datetime import datetime, timedelta
 
+# TODO: Create new file for output
+
+# @Var dir_Path: Path to the folder containing the necessary files for this program
+# @Var w2Path: Path to the file containing the names of the W2 drivers
+# @Description: Class for necessary global variables
 class Data:
     dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
     w2Path = '%sDrivers.xlsx' % dir_path
 
-def loadData():
-    dir_path = '%s\\HOSFilter\\' % os.environ['APPDATA']
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
 
-    file_path = '%sDrivers.xlsx' % dir_path
-    if not exists(file_path):
+# @Description: Verifies that the proper directories and files are in place
+def loadData():
+    if not os.path.exists(Data.dir_path):
+        os.makedirs(Data.dir_path)
+
+    if not exists(Data.w2Path):
         print('List of W2 Drivers not found, please enter new list!')
         copyXLSX(input("Enter new W2 list: "))
 
-def copyXLSX(FilePath):
-    if '"' in FilePath:
-        FilePath = FilePath.replace('"', '')
-    df = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
+
+# @Param filePath: File path to the new Drivers.xlsx file provided by the user
+# @Description: Fills the drivers.xlsx file with names given from a different file
+def copyXLSX(filePath: str):
+    if '"' in filePath:
+        filePath = filePath.replace('"', '')
+    df = pd.read_excel(filePath, sheet_name='Sheet1', header=0)
     writer = pd.ExcelWriter(Data.w2Path, engine='openpyxl')
     df.columns = ["W2 Drivers"]
     df.to_excel(writer, sheet_name='Sheet1', index=False)
     writer.save()
 
-def getW2():
+
+# @Return: Dataframe of all the names of the W2 Drivers
+# @Description: Finds the file of Excel drivers and returns a dataframe of all their names
+def getW2() -> pd.DataFrame:
     if not exists(Data.w2Path):
         loadData()
 
@@ -46,20 +56,12 @@ def getW2():
     drivers['W2 Drivers'] = drivers['W2 Drivers'].str.lower()
     return drivers
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.environ.get("_MEIPASS2", os.path.abspath("."))
 
-    return os.path.join(base_path, relative_path)
-
-def deleteRows(FilePath):
-    # Gets data from Excel sheet and removes elements that are in the 1099 drivers list
-    df = pd.read_excel(FilePath, sheet_name='Duty Time', header=8, index_col=False)
-    # df2 = pd.read_excel(FilePath, sheet_name='Sheet1', header=0)
+# @Param filePath: File path to the user's input file
+# @Description: Overwrites input file and outputs all the names and their clock in/out if they're a W2 Driver
+def deleteRows(filePath: str):
+    # Filters all the drivers on the input file
+    df = pd.read_excel(filePath, sheet_name='Duty Time', header=8, index_col=False)
     df2 = getW2()
     df = df[df['Login'].str.lower().isin(df2['W2 Drivers'])]
 
@@ -67,24 +69,24 @@ def deleteRows(FilePath):
     df.replace("", "NaN", inplace=True)
     df.dropna(subset=['Login'], inplace=True)
 
-    # Removes total column and unnamed column
+    # Removes total column and unnamed column from dataframe
     del df['Total']
     del df['Unnamed: 0']
 
-    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-    #     print(df)
-
-    # Print DF
-    writer = pd.ExcelWriter(FilePath, engine='openpyxl')
+    # Overwrite input file with the filtered data
+    writer = pd.ExcelWriter(filePath, engine='openpyxl')
     df.to_excel(writer, sheet_name='Output', index=False)
     writer.save()
 
-def formatCols(FilePath):
-    workbook = openpyxl.load_workbook(FilePath)
+
+# @Param filePath: File path to the output file
+# Description: Formats the output data into a more readable format
+def formatCols(filePath: str):
+    # Setup for formatting output file
+    workbook = openpyxl.load_workbook(filePath)
     worksheet = workbook['Output']
 
-    # Using openpyxl to format the new Excel sheet
-
+    # Changes the column data format
     # Format Source Code: https://openpyxl.readthedocs.io/en/stable/_modules/openpyxl/styles/numbers.html
     for cell in worksheet['C']:
         cell.number_format = numbers.FORMAT_DATE_XLSX14
@@ -96,6 +98,7 @@ def formatCols(FilePath):
     for cell in worksheet['G']:
         cell.number_format = numbers.FORMAT_DATE_TIME2
 
+    # Changes the column's width
     worksheet.column_dimensions['A'].width = 20
     worksheet.column_dimensions['B'].width = 20
     worksheet.column_dimensions['C'].width = 20
@@ -121,32 +124,11 @@ def formatCols(FilePath):
                     for j in range(colIndex, worksheet.max_column+1):
                         worksheet.cell(row=i, column=j).fill = yellowFill
 
-    # Adds time total column #TODO: Incorrect Times Calculated!!!
-    redFill = PatternFill(start_color='00FC0303', end_color='00FC0303', fill_type='solid')
-    orangeFill = PatternFill(start_color='00FAAC02', end_color='00FAAC02', fill_type='solid')
-    # currentName = worksheet['A1'].value
-    # startIndex = 2
-    # fill = False
-    # for i in range(2, worksheet.max_row + 2):
-    #     if worksheet.cell(row=i, column=colIndex).value != currentName:
-    #         currentName = worksheet.cell(row=i, column=colIndex).value
-    #         total = timedelta(hours=0)
-    #         for j in range(startIndex, i):
-    #             s1 = str(worksheet.cell(row=j, column=5).value)
-    #             startTime = datetime.strptime(s1, '%Y-%m-%d %H:%M:%S')
-    #             s2 = str(worksheet.cell(row=j, column=8).value)
-    #             endTime = datetime.strptime(s2, '%Y-%m-%d %H:%M:%S')
-    #             total = total + (endTime-startTime)
-    #         worksheet.cell(row=i - 1, column=9).value = total
-    #         if fill:
-    #             worksheet.cell(row=i - 1, column=9).fill = orangeFill
-    #         else:
-    #             worksheet.cell(row=i - 1, column=9).fill = redFill
-    #         fill = not fill
-    #         startIndex = i
+    # Save updates
+    workbook.save(filePath)
 
-    workbook.save(FilePath)
 
+# @Description: Main runner for the program
 if __name__ == '__main__':
     loadData()
     print("Instructions: ", "Before running the program make sure the relevant Excel file is closed", "1) Find the timecard sheet in file-explorer or on the desktop", "2) Right click the file and select, \"Copy\"", "3) Right click in file-explorer or on the desktop and select, \"Paste\"", "4) Hold shift then right click the copied file and select, \"Copy as path\"", sep='\n')
