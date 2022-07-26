@@ -7,6 +7,9 @@
 # and outputs an Excel sheet that filters all names
 # that are on the 1099 driver list
 
+
+import datetime
+from datetime import datetime, timedelta, time
 import os
 import sys
 import pandas as pd
@@ -14,7 +17,6 @@ from os.path import exists
 import openpyxl
 from openpyxl.styles import numbers, PatternFill
 
-# TODO: Create new file for output
 
 # @Var dir_Path: Path to the folder containing the necessary files for this program
 # @Var w2Path: Path to the file containing the names of the W2 drivers
@@ -57,6 +59,15 @@ def getW2() -> pd.DataFrame:
     return drivers
 
 
+# @Param td: A timedelta object
+# @Return str: The string value of the total hours:minutes:seconds represented by the timedelta object
+# @Description: Takes a time delta object and converts it into the HH:MM:SS format
+def formatTimedelta(td: timedelta) -> str:
+    minutes, seconds = divmod(td.seconds + td.days * 86400, 60)
+    hours, minutes = divmod(minutes, 60)
+    return '{:d}:{:02d}:{:02d}'.format(hours, minutes, seconds)
+
+
 # @Param filePath: File path to the user's input file
 # @Description: Overwrites input file and outputs all the names and their clock in/out if they're a W2 Driver
 def deleteRows(filePath: str):
@@ -73,7 +84,24 @@ def deleteRows(filePath: str):
     del df['Total']
     del df['Unnamed: 0']
 
+    # Calculates the total hours clocked in for each person
+    total = timedelta(hours = 0)
+    name = df.iloc[0]['Login']
+    totals = []
+    for i in range(0, len(df.index)):
+        if name != df.iloc[i]['Login']:
+            totals.append(formatTimedelta(total))
+            name = df.iloc[i]['Login']
+            total = timedelta(hours = 0)
+        elif i > 0:
+            totals.append("")
+        dtEnd = df.iloc[i]['Shift End Time']
+        dtStart = df.iloc[i]['Shift Start Time']
+        total += (dtEnd - dtStart)
+    totals.append(formatTimedelta(total))
+
     # Overwrite input file with the filtered data
+    df['Total Hours'] = totals
     writer = pd.ExcelWriter(filePath, engine='openpyxl')
     df.to_excel(writer, sheet_name='Output', index=False)
     writer.save()
@@ -106,6 +134,7 @@ def formatCols(filePath: str):
     worksheet.column_dimensions['E'].width = 20
     worksheet.column_dimensions['F'].width = 20
     worksheet.column_dimensions['G'].width = 20
+    worksheet.column_dimensions['H'].width = 20
 
     # Alternates filling each row based off of a new username
     yellowFill = PatternFill(start_color='00FFFF00', end_color='00FFFF00', fill_type='solid')
