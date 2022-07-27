@@ -56,6 +56,7 @@ def getW2() -> pd.DataFrame:
 
     drivers = pd.read_excel(Data.w2Path, sheet_name='Sheet1', header=0)
     drivers['W2 Drivers'] = drivers['W2 Drivers'].str.lower()
+    drivers['W2 Drivers'] = drivers['W2 Drivers'].str.strip()
     return drivers
 
 
